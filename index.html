@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Mimic you v0.30</title>
+    <title>Mimic you v0.40</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
@@ -78,7 +78,7 @@
         <div class="flex flex-col md:flex-row items-center justify-between border-b border-slate-100 pb-6 gap-4">
             <div>
                 <h1 class="text-3xl font-extrabold text-slate-700 flex items-baseline tracking-tight">
-                    Mimic you <span class="text-slate-400 text-base ml-3 font-bold">v0.30</span>
+                    Mimic you <span class="text-slate-400 text-base ml-3 font-bold">v0.40</span>
                 </h1>
             </div>
 
@@ -643,7 +643,7 @@
                 bubbleContainer.className = "p-10 md:p-12 rounded-[2.5rem] bg-[#f4faff] border-0 flex flex-col justify-center min-h-[220px] transition-all duration-500 shadow-sm relative";
                 
                 // [요구사항 반영] 캐릭터 변경 시, 곰은 1.4 기저값으로 피치 리셋 설정
-                updatePitchModifier(1.4);
+                updatePitchModifier(1.3);
                 
                 if (hasInitialized) {
                     speakText("Hi there! I'm Xena. It's so good to see you again! Press the START button, and I will mimic your words!");
@@ -690,6 +690,7 @@
             }
 
             isMimicActive = true;
+            updatePitchModifier(1.5); // [요구사항 반영] 스타트 시 유저는 1.5로 자동 세팅
             
             // UI 스타일 Rose/Stop 색으로 전환
             mainBtn.className = "px-12 py-5 bg-rose-600 hover:bg-rose-700 active:scale-95 text-white text-xl font-black rounded-2xl shadow-md transition-all flex items-center justify-center gap-3";
