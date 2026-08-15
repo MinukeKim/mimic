@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Mimic you v0.10</title>
+    <title>Mimic you v0.30</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
@@ -74,11 +74,11 @@
     <!-- 메인 네이티브 컨테이너 (바탕 카드 패널 제거, 풀화면 레이아웃) -->
     <div class="w-full max-w-7xl mx-auto flex flex-col flex-1 justify-between gap-12">
         
-        <!-- HEADER BAR (타이틀 v0.57 짙은 회색 지정 및 우측 제어) -->
+        <!-- HEADER BAR (타이틀 v0.20 짙은 회색 지정 및 우측 제어) -->
         <div class="flex flex-col md:flex-row items-center justify-between border-b border-slate-100 pb-6 gap-4">
             <div>
                 <h1 class="text-3xl font-extrabold text-slate-700 flex items-baseline tracking-tight">
-                    Mimic you <span class="text-slate-400 text-base ml-3 font-bold">v0.10</span>
+                    Mimic you <span class="text-slate-400 text-base ml-3 font-bold">v0.30</span>
                 </h1>
             </div>
 
@@ -93,8 +93,8 @@
                 <!-- 변조 속도/피치 게이지 -->
                 <div class="flex items-center space-x-2 px-3 py-1 border-l border-slate-200">
                     <span class="text-xs font-bold text-slate-500">🐹 Pitch:</span>
-                    <input type="range" id="mimic-pitch-slider" min="1.0" max="2.0" step="0.1" value="1.4" class="w-24 accent-indigo-600" oninput="updatePitchModifier(this.value)">
-                    <span id="mimic-pitch-text" class="text-xs text-slate-500 font-mono font-bold w-10 text-right">1.4x</span>
+                    <input type="range" id="mimic-pitch-slider" min="1.0" max="2.0" step="0.1" value="1.3" class="w-24 accent-indigo-600" oninput="updatePitchModifier(this.value)">
+                    <span id="mimic-pitch-text" class="text-xs text-slate-500 font-mono font-bold w-10 text-right">1.3x</span>
                 </div>
 
                 <!-- 볼륨 게이지 슬라이더 -->
@@ -178,7 +178,7 @@
         let isTutorSpeaking = false; // TTS가 재생 중인지 여부
         let hasInitialized = false;
         let masterVolume = 1.0;
-        let mimicPitchValue = 1.4; // 변조 피치/배속 기본값
+        let mimicPitchValue = 1.3; // 변조 피치/배속 기본값 (Xeno: 1.3, Xena: 1.7)
         
         // Mimic play core variables (Talking Tom loop)
         let isMimicActive = false; // START 버튼 활성화 여부
@@ -227,7 +227,7 @@
                 "xena": { "baseScale": 0.9, "baseX": -1, "baseY": 35, "eyeY": 96, "eyeSpacing": 70, "eyeWidth": 13, "eyeHeight": 13, "eyeLineThickness": 1, "pupilSize": 24, "pupilLeftOffsetX": 2.5, "pupilRightOffsetX": -3, "eyebrowY": -36, "eyebrowLength": 21, "eyebrowAngle": -14, "eyebrowThickness": 3, "mouthY": 145, "mouthWidth": 33.5, "verticalLineLength": 7, "mouthCurve": 9, "mouthOffsetX": 1, "mouthOffsetY": 1.5, "mouthLineThickness": 1.4, "mouthOpenStyle": "smiling" },
                 "xeno": { "baseScale": 0.9, "baseX": 0, "baseY": 12, "eyeY": 67, "eyeSpacing": 66, "eyeWidth": 15, "eyeHeight": 15.5, "eyeLineThickness": 1, "pupilSize": 24.2, "pupilLeftOffsetX": 2.5, "pupilLeftOffsetY": 1, "pupilRightOffsetX": -3, "pupilRightOffsetY": 0.5, "eyebrowY": -33, "eyebrowLength": 26, "eyebrowAngle": -16, "eyebrowThickness": 4, "mouthY": 111, "mouthWidth": 29, "verticalLineLength": 7, "mouthCurve": 10, "mouthOffsetX": -1.5, "mouthOffsetY": 1, "mouthLineThickness": 1.6, "mouthOpenStyle": "smiling" }
             },
-            simulation: { mouthOpen: 0, blinkState: 0, blinkTimer: 0, isSpeaking: false, vowel: 'A', speakIntervalId: null },
+            simulation: { mouthOpen: 0, blinkState: 0, blinkTimer: 0, isSpeaking: false, speakType: 'none', vowel: 'A', speakIntervalId: null },
             ctx: null,
             images: { xena: new Image(), xeno: new Image() },
             imageLoaded: { xena: false, xeno: false },
@@ -243,20 +243,26 @@
                 this.startLoop();
             },
 
-            startSpeakingAnim: function() {
+            startSpeakingAnim: function(type = 'tts') {
                 clearInterval(this.simulation.speakIntervalId);
                 this.simulation.isSpeaking = true;
-                const vowels = ['A', 'E', 'I', 'O', 'U'];
-                let vIdx = 0;
-                this.simulation.speakIntervalId = setInterval(() => {
-                    this.simulation.mouthOpen = 4 + Math.random() * 8;
-                    this.simulation.vowel = vowels[vIdx];
-                    vIdx = (vIdx + 1) % vowels.length;
-                }, 130);
+                this.simulation.speakType = type;
+                
+                // TTS 발화 애니메이션일 때만 랜덤 오물거림 인터벌 가동
+                if (type === 'tts') {
+                    const vowels = ['A', 'E', 'I', 'O', 'U'];
+                    let vIdx = 0;
+                    this.simulation.speakIntervalId = setInterval(() => {
+                        this.simulation.mouthOpen = 4 + Math.random() * 8;
+                        this.simulation.vowel = vowels[vIdx];
+                        vIdx = (vIdx + 1) % vowels.length;
+                    }, 130);
+                }
             },
 
             stopSpeakingAnim: function() {
                 this.simulation.isSpeaking = false;
+                this.simulation.speakType = 'none';
                 clearInterval(this.simulation.speakIntervalId);
                 this.simulation.speakIntervalId = null;
                 this.simulation.mouthOpen = 0;
@@ -280,6 +286,29 @@
                         this.drawBackupSilhouette();
                     }
 
+                    // [버그 수정 및 리팩토링] 변조 오디오 재생 시 입 모양 추적 로직을 60FPS 메인 루프에 정밀 이식!
+                    // 이로써 재생 버퍼와 렌더 스레드 간의 립싱크 꼬임이나 바르르 떠는 노이즈가 완전히 사라집니다.
+                    if (isPlaybackActive && playbackAnalyser) {
+                        const bufferLength = playbackAnalyser.frequencyBinCount;
+                        const dataArray = new Uint8Array(bufferLength);
+                        playbackAnalyser.getByteFrequencyData(dataArray);
+                        let sum = 0;
+                        for (let i = 0; i < bufferLength; i++) {
+                            sum += dataArray[i];
+                        }
+                        const average = sum / bufferLength;
+                        
+                        // 지수 평활화 필터를 통해 입술 떨림 노이즈를 제어하고 부드럽고 가시적인 상하 개구도 구현
+                        const targetMouthOpen = Math.min(14, average * 0.22);
+                        this.simulation.mouthOpen = (this.simulation.mouthOpen * 0.75) + (targetMouthOpen * 0.25);
+                        
+                        const vowels = ['A', 'E', 'I', 'O', 'U'];
+                        if (this.simulation.mouthOpen > 1.5) {
+                            const vowelIndex = Math.floor((Date.now() / 120) % vowels.length);
+                            this.simulation.vowel = vowels[vowelIndex];
+                        }
+                    }
+
                     // 2. 고화질 실시간 조율 피처 (눈, 눈썹, 입동기화) 순차 빌드
                     this.drawVectorEyes();
                     this.drawVectorEyebrows();
@@ -296,19 +325,6 @@
                                 this.simulation.blinkState = 0; // Open
                                 this.simulation.blinkTimer = 0;
                             }
-                        }
-                    }
-
-                    // 4. 안전 가드 루프 (립싱크 애니메이션 소리가 물리적으로 끝나면 즉시 입동작 종료)
-                    // 발화 시작 후 500ms 이후부터 speechSynthesis.speaking 상태를 적극 반영하여 먹통 현상 전면 차단
-                    const now = Date.now();
-                    const hasSpeechStarted = (now - window.lastSpeakStartTime > 500);
-                    if (this.simulation.isSpeaking && !isPlaybackActive) {
-                        if (hasSpeechStarted && !speechSynthesis.speaking) {
-                            this.stopSpeakingAnim();
-                            isTutorSpeaking = false;
-                            volSlider.disabled = false;
-                            window.activeUtterance = null;
                         }
                     }
 
@@ -536,10 +552,12 @@
             }
             
             isTutorSpeaking = true;
-            renderer.startSpeakingAnim();
             volSlider.disabled = true;
-
             tutorBubble.innerHTML = text;
+
+            // [안정성 조치] SpeechSynthesis가 백그라운드 엔진 가동 중 딜레이가 있더라도
+            // 립싱크를 선제 가동하여 곰 캐릭터 및 여우의 입 애니메이션 끊김 현상을 완벽히 해결합니다.
+            renderer.startSpeakingAnim('tts');
 
             const utterance = new SpeechSynthesisUtterance(text);
             window.activeUtterance = utterance;
@@ -554,22 +572,24 @@
             if (!bestVoice) bestVoice = voices.find(v => v.lang.includes(targetLang));
             if (bestVoice) utterance.voice = bestVoice;
 
-            // Xeno: 발랄한 여우 / Xena: 상냥한 아기 곰 톤온톤 적용 (변조게이지에 영향 받아서 핏 변형)
-            const basePitch = currentChar === 'xeno' ? 1.35 : 1.05;
-            const baseRate = 0.95;
-            
-            // 1.4x 를 기본 1배 기준으로 잡아 비례 스케일 연산 처리
-            const scaleFactor = mimicPitchValue / 1.4;
-            
-            utterance.pitch = Math.min(2.0, Math.max(0.1, basePitch * scaleFactor));
-            utterance.rate = Math.min(3.0, Math.max(0.5, baseRate * scaleFactor));
+            // [핵심 요구사항 반영] 슬라이더의 변조 피치/배율에 맞춰 인사말 음성도 완벽히 동조되어 찢어지는 칩만큼 톤 변형
+            utterance.pitch = mimicPitchValue;
+            utterance.rate = Math.min(1.4, Math.max(0.7, 0.95 * (mimicPitchValue / (currentChar === 'xeno' ? 1.3 : 1.7))));
 
-            utterance.onend = () => stopSpeaking();
-            utterance.onerror = () => stopSpeaking();
+            utterance.onstart = () => {
+                renderer.startSpeakingAnim('tts');
+            };
+            utterance.onend = () => {
+                stopSpeaking();
+            };
+            utterance.onerror = () => {
+                stopSpeaking();
+            };
 
-            const duration = (text.length * 100) + 1500;
+            const duration = (text.length * 110) + 1500;
             window.ttsFallbackTimeout = setTimeout(() => {
                 if (isTutorSpeaking) {
+                    console.log("TTS Safety Fallback triggered.");
                     stopSpeaking();
                 }
             }, duration);
@@ -580,6 +600,12 @@
 
         function stopSpeaking() {
             clearTimeout(window.ttsFallbackTimeout);
+            if (window.activeUtterance) {
+                window.activeUtterance.onstart = null;
+                window.activeUtterance.onend = null;
+                window.activeUtterance.onerror = null;
+            }
+            speechSynthesis.cancel(); // Stop TTS audio completely
             isTutorSpeaking = false;
             renderer.stopSpeakingAnim();
             volSlider.disabled = false;
@@ -590,23 +616,23 @@
            4. 캐릭터 전환 및 파스텔 말풍선 스타일 주입
            ========================================================= */
         function setCharacter(char) {
-            // [요구사항 반영] 캐릭터 변경 시, 기존 진행하던 녹음/변조 상태를 완전히 리셋하고 처음부터 다시 시작
             currentChar = char;
 
-            // 오디오 재생, VAD, 녹음 루프 즉시 초기 정지
+            // 캐릭터 변경 시 오디오 재생 및 TTS 즉시 초기화하여 충돌 완벽 차단
             stopSpeaking();
             stopMimicPlayMode(); 
 
             document.getElementById('char-xeno').className = "px-4 py-2 text-xs font-bold text-slate-500 rounded-lg transition-all";
             document.getElementById('char-xena').className = "px-4 py-2 text-xs font-bold text-slate-500 rounded-lg transition-all";
 
+            // [아주 옅은 오렌지 & 아주 옅은 하늘색 말풍선 완벽 매칭]
             if (char === 'xeno') {
                 document.getElementById('char-xeno').className = "px-4 py-2 text-xs font-black bg-orange-500 text-white rounded-lg shadow-sm transition-all";
                 tutorLabel.innerText = "XENO";
                 bubbleContainer.className = "p-10 md:p-12 rounded-[2.5rem] bg-[#fffcf5] border-0 flex flex-col justify-center min-h-[220px] transition-all duration-500 shadow-sm relative";
                 
-                // 캐릭터별 기저 변조값 매핑 설정 변경
-                updatePitchModifier(1.5);
+                // [요구사항 반영] 캐릭터 변경 시, 여우는 1.3 기저값으로 피치 리셋 설정
+                updatePitchModifier(1.3);
                 
                 if (hasInitialized) {
                     speakText("Hello! I'm Xeno. It's so good to see you again! Press the START button, and I will mimic your words!");
@@ -616,8 +642,8 @@
                 tutorLabel.innerText = "XENA";
                 bubbleContainer.className = "p-10 md:p-12 rounded-[2.5rem] bg-[#f4faff] border-0 flex flex-col justify-center min-h-[220px] transition-all duration-500 shadow-sm relative";
                 
-                // 캐릭터별 기저 변조값 매핑 설정 변경
-                updatePitchModifier(1.3);
+                // [요구사항 반영] 캐릭터 변경 시, 곰은 1.4 기저값으로 피치 리셋 설정
+                updatePitchModifier(1.4);
                 
                 if (hasInitialized) {
                     speakText("Hi there! I'm Xena. It's so good to see you again! Press the START button, and I will mimic your words!");
@@ -626,7 +652,7 @@
         }
 
         /* =========================================================
-           5. 볼륨 설정 제어
+           5. 볼륨 및 피치 변조 제어 슬라이더
            ========================================================= */
         function updateVolume(val) {
             masterVolume = parseFloat(val);
@@ -733,19 +759,8 @@
             const checkVADLevel = () => {
                 if (!isMimicActive) return; // 미믹 모드가 완전 꺼지면 즉시 이탈
 
-                // 만약 현재 곰/여우가 칩만큼 재생 중이라면 마이크 피드백을 루프하지 않고 립싱크에만 집중
+                // 만약 현재 곰/여우가 칩만큼 재생 중이라면 마이크 분석 처리를 스킵하고 립싱크 렌더러에 연산 권한 양도
                 if (isPlaybackActive) {
-                    if (playbackAnalyser) {
-                        playbackAnalyser.getByteFrequencyData(dataArray);
-                        let sum = 0;
-                        for (let i = 0; i < bufferLength; i++) {
-                            sum += dataArray[i];
-                        }
-                        const average = sum / bufferLength;
-                        // 실시간 녹음 재생용 리얼 볼륨 립싱크 동기화 연산 (바르르 떠는 노이즈 감쇠를 위한 지수 평활화 적용)
-                        const targetMouthOpen = Math.min(12, average * 0.18);
-                        renderer.simulation.mouthOpen = (renderer.simulation.mouthOpen * 0.75) + (targetMouthOpen * 0.25);
-                    }
                     vadAnimationId = requestAnimationFrame(checkVADLevel);
                     return;
                 }
@@ -774,8 +789,18 @@
                         
                         userText.innerText = "Speak now! I'm listening... 🎙️";
                         
-                        // MediaRecorder 구동
-                        mediaRecorder = new MediaRecorder(micStream);
+                        // MediaRecorder 구동 (모바일 브라우저 및 iOS 호환을 위한 MIME Type 선별 처리)
+                        let recorderOptions = {};
+                        if (typeof MediaRecorder !== 'undefined' && typeof MediaRecorder.isTypeSupported === 'function') {
+                            if (MediaRecorder.isTypeSupported('audio/webm')) {
+                                recorderOptions = { mimeType: 'audio/webm' };
+                            } else if (MediaRecorder.isTypeSupported('audio/mp4')) {
+                                recorderOptions = { mimeType: 'audio/mp4' };
+                            } else if (MediaRecorder.isTypeSupported('audio/aac')) {
+                                recorderOptions = { mimeType: 'audio/aac' };
+                            }
+                        }
+                        mediaRecorder = new MediaRecorder(micStream, recorderOptions);
                         mediaRecorder.ondataavailable = e => {
                             if (e.data.size > 0) audioChunks.push(e.data);
                         };
@@ -819,9 +844,10 @@
 
             isPlaybackActive = true;
             userText.innerText = "Mimicking! 🔊";
-            renderer.startSpeakingAnim();
+            renderer.startSpeakingAnim('mimic');
 
-            const blob = new Blob(audioChunks, { type: 'audio/webm' });
+            const mimeType = (mediaRecorder && mediaRecorder.mimeType) ? mediaRecorder.mimeType : 'audio/webm';
+            const blob = new Blob(audioChunks, { type: mimeType });
             
             try {
                 const arrayBuffer = await blob.arrayBuffer();
@@ -831,8 +857,7 @@
                 const source = audioCtx.createBufferSource();
                 source.buffer = audioBuffer;
 
-                // [핵심 요구사항] 목소리 피치와 속도를 조화롭게 변조 (1.45배 속도 상공 변형)
-                // playbackRate 배속 수치를 올리면 재생이 빠르고 컴팩트하게 밀려 피치 주파수도 익살스럽게 솟구칩니다.
+                // [핵심 요구사항] 목소리 피치와 속도를 조화롭게 변조 (1.0x ~ 2.0x 배속 유동 스케일 조율 완료)
                 source.playbackRate.value = mimicPitchValue;
 
                 // 립싱크 앰플리튜드 정밀 추적용 프레임 버퍼 노드 결합
@@ -917,8 +942,7 @@
 
         window.onload = () => {
             renderer.init();
-            updatePitchModifier(1.5);
-            setCharacter('xeno');
+            setCharacter('xeno'); // Xeno로 캐릭터 기본 설정 (Xeno pitch = 1.3 자동 조절)
         };
     </script>
 </body>
