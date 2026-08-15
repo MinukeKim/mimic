@@ -32,17 +32,10 @@
                 padding: 1rem !important;
             }
             #tutor-bubble-container, #user-bubble-container {
-                padding: 1.5rem !important;
-                min-height: 120px !important;
+                /* 모바일 패딩 대폭 축소 (위아래 여백 줄임) */
+                padding: 1.25rem 1.5rem !important;
+                min-height: 80px !important;
                 border-radius: 1.5rem !important;
-            }
-            #tutor-bubble {
-                font-size: 1.25rem !important;
-                line-height: 1.5 !important;
-            }
-            #user-text {
-                font-size: 1.25rem !important;
-                line-height: 1.5 !important;
             }
             #main-action-btn {
                 padding: 1rem 2.5rem !important;
@@ -73,11 +66,11 @@
     <!-- 메인 네이티브 컨테이너 -->
     <div class="w-full max-w-7xl mx-auto flex flex-col flex-1 justify-between gap-12">
         
-        <!-- HEADER BAR (타이틀만 남김) -->
+        <!-- HEADER BAR (모바일 타이틀 70% 축소 적용) -->
         <div class="flex flex-col md:flex-row items-center justify-between border-b border-slate-100 pb-6 gap-4">
             <div>
-                <h1 class="text-3xl font-extrabold text-slate-700 flex items-baseline tracking-tight">
-                    Mimic you <span class="text-slate-400 text-base ml-3 font-bold">v0.60</span>
+                <h1 class="text-[21px] md:text-3xl font-extrabold text-slate-700 flex items-baseline tracking-tight">
+                    Mimic you <span class="text-[11px] md:text-base text-slate-400 ml-3 font-bold">v0.60</span>
                 </h1>
             </div>
         </div>
@@ -103,29 +96,20 @@
             <div class="md:col-span-7 flex flex-col justify-center h-full gap-8">
                 
                 <!-- 1. 말풍선 교체 통합 래퍼 (높이를 선점하여 레이아웃 널뜀 방지) -->
-                <div class="w-full min-h-[220px] flex flex-col justify-center">
+                <div class="w-full min-h-[140px] md:min-h-[220px] flex flex-col justify-center">
                     
-                    <!-- TUTOR 버블 -->
-                    <div id="tutor-bubble-container" class="p-10 md:p-12 rounded-[2.5rem] transition-all duration-500 flex flex-col justify-center w-full h-full shadow-sm relative border-0">
-                        <div class="mb-3">
-                            <span id="tutor-label" class="text-xs font-black text-slate-400 tracking-widest uppercase">TUTOR</span>
-                        </div>
-                        <div id="tutor-bubble" class="text-slate-800 font-extrabold text-2xl md:text-3xl leading-relaxed transition-all duration-300">
+                    <!-- TUTOR 버블 (캐릭터 이름 라벨 제거, 패딩/폰트 축소 적용) -->
+                    <div id="tutor-bubble-container" class="py-6 px-8 md:p-12 rounded-[2.5rem] transition-all duration-500 flex flex-col justify-center w-full h-full shadow-sm relative border-0">
+                        <div id="tutor-bubble" class="text-slate-800 font-extrabold text-[17px] md:text-3xl leading-relaxed transition-all duration-300">
                             Initializing character...
                         </div>
                     </div>
 
-                    <!-- YOU 버블 (기본 숨김) -->
-                    <div id="user-bubble-container" class="hidden p-10 md:p-12 rounded-[2.5rem] bg-[#fffdf0] border-0 flex flex-col justify-center w-full h-full shadow-sm relative transition-all duration-500">
-                        <div class="mb-3 flex justify-between items-center">
-                            <div class="flex items-center space-x-4">
-                                <span class="text-xs font-black text-slate-400 tracking-widest uppercase">YOU</span>
-                                <span id="automatic-speak-indicator" class="hidden flex items-center bg-rose-50 text-rose-600 text-[10px] font-black px-2.5 py-1.5 rounded-full border border-rose-100 animate-pulse">
-                                    <span class="w-2 h-2 bg-rose-500 rounded-full mr-1.5 animate-blink-record inline-block"></span>
-                                    Speak Now!
-                                </span>
-                            </div>
-                            
+                    <!-- YOU 버블 (기본 숨김, YOU/Speak Now 라벨 제거, 패딩/폰트 축소 적용) -->
+                    <div id="user-bubble-container" class="hidden py-6 px-8 md:p-12 rounded-[2.5rem] bg-[#fffdf0] border-0 flex flex-col justify-center w-full h-full shadow-sm relative transition-all duration-500">
+                        
+                        <!-- 마이크 볼륨 실시간 게이지 (단독 우측 정렬 유지) -->
+                        <div class="mb-3 flex justify-end items-center">
                             <div id="mic-gauge-container" class="hidden flex items-center space-x-2 bg-indigo-50 px-3 py-1.5 rounded-full border border-indigo-100 transition-all duration-300">
                                 <span class="text-[9px] font-black text-indigo-500 uppercase tracking-wider">Volume</span>
                                 <div class="w-24 h-2 bg-indigo-200/60 rounded-full overflow-hidden">
@@ -133,7 +117,8 @@
                                 </div>
                             </div>
                         </div>
-                        <div id="user-text" class="text-slate-400 font-bold text-xl md:text-3xl italic transition-all duration-300 leading-relaxed">
+
+                        <div id="user-text" class="text-slate-400 font-bold text-[17px] md:text-3xl italic transition-all duration-300 leading-relaxed">
                             Listening... Speak now! 🎙️
                         </div>
                     </div>
@@ -202,14 +187,12 @@
         const tutorBubbleContainer = document.getElementById('tutor-bubble-container');
         const userBubbleContainer = document.getElementById('user-bubble-container');
         const tutorBubble = document.getElementById('tutor-bubble');
-        const tutorLabel = document.getElementById('tutor-label');
         const canvasEl = document.getElementById('tutorCanvas');
         const volSlider = document.getElementById('master-vol');
         const userText = document.getElementById('user-text');
         const mainBtn = document.getElementById('main-action-btn');
         const btnIcon = document.getElementById('btn-icon');
         const btnText = document.getElementById('btn-text');
-        const micIndicator = document.getElementById('automatic-speak-indicator');
         const micGaugeContainer = document.getElementById('mic-gauge-container');
         const micGaugeFill = document.getElementById('mic-gauge-fill');
 
@@ -551,7 +534,6 @@
             if (!bestVoice) bestVoice = voices.find(v => v.lang.includes(targetLang));
             if (bestVoice) utterance.voice = bestVoice;
 
-            // [요구사항 반영] Xena 피치 기본값을 1.5로 기준 조정 완료
             const safePitch = parseFloat(mimicPitchValue) || 1.3;
             const basePitch = currentChar === 'xeno' ? 1.3 : 1.5; 
             utterance.pitch = safePitch;
@@ -603,22 +585,18 @@
 
             if (char === 'xeno') {
                 document.getElementById('char-xeno').className = "px-4 py-2 text-xs font-black bg-orange-500 text-white rounded-lg shadow-sm transition-all";
-                tutorLabel.innerText = "XENO";
-                tutorBubbleContainer.className = "p-10 md:p-12 rounded-[2.5rem] bg-[#fffcf5] border-0 flex flex-col justify-center w-full h-full transition-all duration-500 shadow-sm relative";
+                tutorBubbleContainer.className = "py-6 px-8 md:p-12 rounded-[2.5rem] bg-[#fffcf5] border-0 flex flex-col justify-center w-full h-full transition-all duration-500 shadow-sm relative";
                 
                 updatePitchModifier(1.3);
                 if (hasInitialized) speakText("Hello, I'm Xeno. Press the START button!");
             } else {
                 document.getElementById('char-xena').className = "px-4 py-2 text-xs font-black bg-blue-500 text-white rounded-lg shadow-sm transition-all";
-                tutorLabel.innerText = "XENA";
-                tutorBubbleContainer.className = "p-10 md:p-12 rounded-[2.5rem] bg-[#f4faff] border-0 flex flex-col justify-center w-full h-full transition-all duration-500 shadow-sm relative";
+                tutorBubbleContainer.className = "py-6 px-8 md:p-12 rounded-[2.5rem] bg-[#f4faff] border-0 flex flex-col justify-center w-full h-full transition-all duration-500 shadow-sm relative";
                 
-                // [요구사항 반영] Xena 변경 시 피치 초기값을 1.5로 갱신
                 updatePitchModifier(1.5);
                 if (hasInitialized) speakText("Hello, I'm Xena. Press the START button!");
             }
 
-            // 캐릭터 변경 시 튜터 말풍선이 뷰에 보이도록 강제 (토글 시스템 연동)
             tutorBubbleContainer.classList.remove('hidden');
             userBubbleContainer.classList.add('hidden');
         }
@@ -650,14 +628,12 @@
             btnIcon.innerText = "■";
             btnText.innerText = "STOP";
 
-            // [요구사항 반영] 말풍선 교체 (TUTOR 숨기고, YOU 보이기)
             tutorBubbleContainer.classList.add('hidden');
             userBubbleContainer.classList.remove('hidden');
 
             userText.innerText = "Listening... Speak now! 🎙️";
-            userText.className = "text-slate-800 font-extrabold text-xl md:text-3xl leading-relaxed transition-all duration-300";
+            userText.className = "text-slate-800 font-extrabold text-[17px] md:text-3xl leading-relaxed transition-all duration-300";
             
-            micIndicator.classList.remove('hidden');
             micGaugeContainer.classList.remove('hidden');
 
             audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
@@ -684,13 +660,11 @@
             btnIcon.innerText = "▶";
             btnText.innerText = "START";
 
-            // [요구사항 반영] 말풍선 원상복구 (YOU 숨기고, TUTOR 보이기)
             userBubbleContainer.classList.add('hidden');
             tutorBubbleContainer.classList.remove('hidden');
             
             tutorBubble.innerText = "Ready to play! Press START.";
 
-            micIndicator.classList.add('hidden');
             micGaugeContainer.classList.add('hidden');
             if (micGaugeFill) micGaugeFill.style.width = '0%';
 
