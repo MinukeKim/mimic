@@ -24,144 +24,110 @@
             aspect-ratio: 2 / 3;
         }
 
+        /* 모바일 환경에서 캔버스 크기 축소 */
         @media (max-width: 768px) {
             .canvas-responsive {
-                max-width: 180px;
-            }
-            body {
-                padding: 1rem !important;
-            }
-            #tutor-bubble-container {
-                padding: 1.5rem !important;
-                min-height: 120px !important;
-                border-radius: 1.5rem !important;
-            }
-            #tutor-bubble {
-                font-size: 1.25rem !important;
-                line-height: 1.5 !important;
-            }
-            #user-bubble-container {
-                padding: 1.25rem !important;
-                min-height: 100px !important;
-                border-radius: 1.5rem !important;
-            }
-            #user-text {
-                font-size: 1rem !important;
-                line-height: 1.4 !important;
-            }
-            #main-action-btn {
-                padding: 1rem 2.5rem !important;
-                font-size: 1.25rem !important;
-                border-radius: 1rem !important;
-            }
-            .max-w-7xl {
-                gap: 1rem !important;
-            }
-            .grid {
-                gap: 1rem !important;
-            }
-            .flex-wrap {
-                gap: 0.5rem !important;
-                padding: 0.5rem !important;
+                max-width: 160px; /* 더 컴팩트하게 조절 */
             }
         }
     </style>
 </head>
-<body class="min-h-screen flex flex-col justify-between p-8 md:p-16 select-none bg-white">
+<!-- 전체 패딩을 p-4 md:p-8로 줄여 세로 공간 확보 -->
+<body class="min-h-screen flex flex-col justify-between p-4 md:p-8 select-none bg-white overflow-x-hidden">
 
     <!-- 1회성 시작 오버레이 -->
     <div id="start-overlay" class="fixed inset-0 bg-[#0f172a] z-[60] flex flex-col items-center justify-center text-white cursor-pointer transition-opacity duration-300" onclick="initAppOnInteraction()">
-        <h2 class="text-5xl font-extrabold tracking-tight mb-4 text-[#f8fafc]">Mimic you</h2>
-        <p class="text-slate-400 text-sm font-bold tracking-widest uppercase">Click anywhere to start</p>
+        <h2 class="text-4xl font-extrabold tracking-tight mb-3 text-[#f8fafc]">Mimic you</h2>
+        <p class="text-slate-400 text-xs font-bold tracking-widest uppercase">Click anywhere to start</p>
     </div>
 
-    <!-- 메인 네이티브 컨테이너 -->
-    <div class="w-full max-w-7xl mx-auto flex flex-col flex-1 justify-between gap-12">
+    <!-- 메인 네이티브 컨테이너 (gap 축소) -->
+    <div class="w-full max-w-7xl mx-auto flex flex-col flex-1 gap-4 md:gap-6">
         
-        <!-- HEADER BAR -->
-        <div class="flex flex-col md:flex-row items-center justify-between border-b border-slate-100 pb-6 gap-4">
+        <!-- HEADER BAR (타이틀 폰트 크기 및 여백 축소) -->
+        <div class="flex flex-col md:flex-row items-center justify-between border-b border-slate-100 pb-3">
             <div>
-                <h1 class="text-3xl font-extrabold text-slate-700 flex items-baseline tracking-tight">
-                    Mimic you <span class="text-slate-400 text-base ml-3 font-bold">v0.60</span>
+                <h1 class="text-xl md:text-2xl font-extrabold text-slate-700 flex items-baseline tracking-tight">
+                    Mimic you <span class="text-slate-400 text-xs md:text-sm ml-2 font-bold">v0.60</span>
                 </h1>
             </div>
         </div>
 
         <!-- MAIN LAYOUT -->
-        <div class="grid grid-cols-1 md:grid-cols-12 gap-12 flex-1 items-stretch">
+        <div class="grid grid-cols-1 md:grid-cols-12 gap-4 md:gap-8 flex-1 items-stretch">
             
             <!-- 좌측 영역: 캔버스 + 캐릭터 선택 -->
-            <div class="md:col-span-5 flex flex-col items-center justify-center space-y-6">
+            <div class="md:col-span-5 flex flex-col items-center justify-center space-y-3">
                 <!-- 캔버스 -->
                 <div class="relative flex items-center justify-center w-full">
                     <canvas id="tutorCanvas" width="400" height="600" class="bg-transparent canvas-responsive transition-all duration-300"></canvas>
                 </div>
                 
-                <!-- 캐릭터 선택 버튼 (좌측 하단) -->
-                <div class="flex space-x-1 bg-slate-100/80 p-1.5 rounded-xl border border-slate-200 shadow-sm mt-4">
-                    <button id="char-xeno" onclick="setCharacter('xeno')" class="px-4 py-2 text-xs font-bold text-slate-500 rounded-lg transition-all">Xeno</button>
-                    <button id="char-xena" onclick="setCharacter('xena')" class="px-4 py-2 text-xs font-bold text-slate-500 rounded-lg transition-all">Xena</button>
+                <!-- 캐릭터 선택 버튼 (좌측 하단, 크기 컴팩트화) -->
+                <div class="flex space-x-1 bg-slate-100/80 p-1 rounded-xl border border-slate-200 shadow-sm mt-2">
+                    <button id="char-xeno" onclick="setCharacter('xeno')" class="px-3 py-1.5 text-[11px] font-bold text-slate-500 rounded-lg transition-all">Xeno</button>
+                    <button id="char-xena" onclick="setCharacter('xena')" class="px-3 py-1.5 text-[11px] font-bold text-slate-500 rounded-lg transition-all">Xena</button>
                 </div>
             </div>
 
-            <!-- 우측 영역: 튜터 말풍선 -> START -> YOU -> 게이지 -->
-            <div class="md:col-span-7 flex flex-col justify-between h-full min-h-[500px] gap-6">
+            <!-- 우측 영역: 튜터 말풍선 -> START -> YOU -> 게이지 (gap 축소) -->
+            <div class="md:col-span-7 flex flex-col justify-center h-full gap-3 md:gap-4">
                 
-                <!-- 1. TUTOR 버블 -->
-                <div id="tutor-bubble-container" class="p-10 md:p-12 rounded-[2.5rem] transition-all duration-500 flex flex-col justify-center min-h-[220px] shadow-sm relative border-0">
-                    <div class="mb-3">
-                        <span id="tutor-label" class="text-xs font-black text-slate-400 tracking-widest uppercase">TUTOR</span>
+                <!-- 1. TUTOR 버블 (패딩, 높이, 폰트 축소) -->
+                <div id="tutor-bubble-container" class="p-5 md:p-6 rounded-3xl transition-all duration-500 flex flex-col justify-center min-h-[100px] md:min-h-[140px] shadow-sm relative border-0">
+                    <div class="mb-1.5">
+                        <span id="tutor-label" class="text-[10px] font-black text-slate-400 tracking-widest uppercase">TUTOR</span>
                     </div>
-                    <div id="tutor-bubble" class="text-slate-800 font-extrabold text-2xl md:text-3xl leading-relaxed transition-all duration-300">
+                    <div id="tutor-bubble" class="text-slate-800 font-extrabold text-lg md:text-xl leading-snug transition-all duration-300">
                         Initializing character...
                     </div>
                 </div>
 
-                <!-- 2. START 버튼 -->
-                <div class="flex items-center justify-center p-5 bg-slate-50 rounded-2xl border border-slate-100 shadow-sm gap-4">
-                    <button id="main-action-btn" onclick="toggleMimicMode()" class="px-12 py-5 bg-indigo-600 hover:bg-indigo-700 active:scale-95 text-white text-xl font-black rounded-2xl shadow-md shadow-indigo-100 transition-all flex items-center justify-center gap-3">
+                <!-- 2. START 버튼 (버튼 크기 및 패딩 축소) -->
+                <div class="flex items-center justify-center p-3 bg-slate-50 rounded-2xl border border-slate-100 shadow-sm">
+                    <button id="main-action-btn" onclick="toggleMimicMode()" class="px-8 py-3 bg-indigo-600 hover:bg-indigo-700 active:scale-95 text-white text-lg font-black rounded-xl shadow-md shadow-indigo-100 transition-all flex items-center justify-center gap-2">
                         <span id="btn-icon">▶</span>
                         <span id="btn-text">START</span>
                     </button>
                 </div>
 
-                <!-- 3. YOU 버블 -->
-                <div id="user-bubble-container" class="p-10 md:p-12 rounded-[2.5rem] bg-[#fffdf0] border-0 flex flex-col justify-center min-h-[160px] shadow-sm relative transition-all duration-500">
-                    <div class="mb-3 flex justify-between items-center">
-                        <div class="flex items-center space-x-4">
-                            <span class="text-xs font-black text-slate-400 tracking-widest uppercase">YOU</span>
-                            <span id="automatic-speak-indicator" class="hidden flex items-center bg-rose-50 text-rose-600 text-[10px] font-black px-2.5 py-1.5 rounded-full border border-rose-100 animate-pulse">
-                                <span class="w-2 h-2 bg-rose-500 rounded-full mr-1.5 animate-blink-record inline-block"></span>
+                <!-- 3. YOU 버블 (패딩, 폰트 축소) -->
+                <div id="user-bubble-container" class="p-4 md:p-6 rounded-3xl bg-[#fffdf0] border-0 flex flex-col justify-center min-h-[80px] md:min-h-[100px] shadow-sm relative transition-all duration-500">
+                    <div class="mb-1.5 flex justify-between items-center">
+                        <div class="flex items-center space-x-3">
+                            <span class="text-[10px] font-black text-slate-400 tracking-widest uppercase">YOU</span>
+                            <span id="automatic-speak-indicator" class="hidden flex items-center bg-rose-50 text-rose-600 text-[9px] font-black px-2 py-1 rounded-full border border-rose-100 animate-pulse">
+                                <span class="w-1.5 h-1.5 bg-rose-500 rounded-full mr-1 animate-blink-record inline-block"></span>
                                 Speak Now!
                             </span>
                         </div>
                         
-                        <div id="mic-gauge-container" class="hidden flex items-center space-x-2 bg-indigo-50 px-3 py-1.5 rounded-full border border-indigo-100 transition-all duration-300">
-                            <span class="text-[9px] font-black text-indigo-500 uppercase tracking-wider">Volume</span>
-                            <div class="w-24 h-2 bg-indigo-200/60 rounded-full overflow-hidden">
+                        <div id="mic-gauge-container" class="hidden flex items-center space-x-1.5 bg-indigo-50 px-2 py-1 rounded-full border border-indigo-100 transition-all duration-300">
+                            <span class="text-[8px] font-black text-indigo-500 uppercase tracking-wider">Vol</span>
+                            <div class="w-16 h-1.5 bg-indigo-200/60 rounded-full overflow-hidden">
                                 <div id="mic-gauge-fill" class="h-full bg-indigo-500 w-0 transition-all duration-75"></div>
                             </div>
                         </div>
                     </div>
-                    <div id="user-text" class="text-slate-400 font-bold text-lg md:text-xl italic transition-all duration-300 leading-relaxed">
+                    <div id="user-text" class="text-slate-400 font-bold text-sm md:text-base italic transition-all duration-300 leading-snug">
                         Tutor is ready. Press START and say something!
                     </div>
                 </div>
 
-                <!-- 4. 피치 및 볼륨 게이지 (우측 하단) -->
-                <div class="flex flex-wrap items-center justify-end gap-6 bg-slate-50/50 p-2.5 rounded-2xl border border-slate-100 shadow-sm mt-auto">
+                <!-- 4. 피치 및 볼륨 게이지 (우측 하단, 크기 컴팩트화) -->
+                <div class="flex flex-wrap items-center justify-end gap-3 bg-slate-50/50 p-2 rounded-xl border border-slate-100 shadow-sm mt-1">
                     <!-- 변조 게이지 -->
-                    <div class="flex items-center space-x-2 px-3 py-1">
-                        <span class="text-xs font-bold text-slate-500">🐹 Pitch:</span>
-                        <input type="range" id="mimic-pitch-slider" min="1.0" max="2.0" step="0.1" value="1.3" class="w-24 accent-indigo-600" oninput="updatePitchModifier(this.value)">
-                        <span id="mimic-pitch-text" class="text-xs text-slate-500 font-mono font-bold w-10 text-right">1.3x</span>
+                    <div class="flex items-center space-x-2 px-2">
+                        <span class="text-[10px] font-bold text-slate-500">🐹 Pitch:</span>
+                        <input type="range" id="mimic-pitch-slider" min="1.0" max="2.0" step="0.1" value="1.3" class="w-16 accent-indigo-600" oninput="updatePitchModifier(this.value)">
+                        <span id="mimic-pitch-text" class="text-[10px] text-slate-500 font-mono font-bold w-6 text-right">1.3x</span>
                     </div>
 
                     <!-- 볼륨 게이지 -->
-                    <div class="flex items-center space-x-2 px-3 py-1 border-l border-slate-200">
-                        <span class="text-sm opacity-70">🔈</span>
-                        <input type="range" id="master-vol" min="0" max="1" step="0.1" value="1" class="w-24 accent-slate-700" oninput="updateVolume(this.value)">
-                        <span id="volume-text" class="text-xs text-slate-500 font-mono font-bold w-10 text-right">100%</span>
+                    <div class="flex items-center space-x-2 px-2 border-l border-slate-200">
+                        <span class="text-[10px] opacity-70">🔈</span>
+                        <input type="range" id="master-vol" min="0" max="1" step="0.1" value="1" class="w-16 accent-slate-700" oninput="updateVolume(this.value)">
+                        <span id="volume-text" class="text-[10px] text-slate-500 font-mono font-bold w-8 text-right">100%</span>
                     </div>
                 </div>
 
@@ -224,9 +190,6 @@
 
             init: function() {
                 this.ctx = canvasEl.getContext('2d');
-                
-                // [포팅 주의] 리눅스 기반 실제 서버(Vercel, AWS 등) 배포 시 대소문자를 엄격히 구분합니다. 
-                // 실제 파일명과 정확히 동일해야 404 에러(이미지 엑스박스)가 발생하지 않습니다.
                 this.images.xena.src = "Xena_base.png";
                 this.images.xeno.src = "Xeno_base.png";
                 
@@ -599,20 +562,20 @@
             stopSpeaking();
             stopMimicPlayMode(); 
 
-            document.getElementById('char-xeno').className = "px-4 py-2 text-xs font-bold text-slate-500 rounded-lg transition-all";
-            document.getElementById('char-xena').className = "px-4 py-2 text-xs font-bold text-slate-500 rounded-lg transition-all";
+            document.getElementById('char-xeno').className = "px-3 py-1.5 text-[11px] font-bold text-slate-500 rounded-lg transition-all";
+            document.getElementById('char-xena').className = "px-3 py-1.5 text-[11px] font-bold text-slate-500 rounded-lg transition-all";
 
             if (char === 'xeno') {
-                document.getElementById('char-xeno').className = "px-4 py-2 text-xs font-black bg-orange-500 text-white rounded-lg shadow-sm transition-all";
+                document.getElementById('char-xeno').className = "px-3 py-1.5 text-[11px] font-black bg-orange-500 text-white rounded-lg shadow-sm transition-all";
                 tutorLabel.innerText = "XENO";
-                bubbleContainer.className = "p-10 md:p-12 rounded-[2.5rem] bg-[#fffcf5] border-0 flex flex-col justify-center min-h-[220px] transition-all duration-500 shadow-sm relative";
+                bubbleContainer.className = "p-5 md:p-6 rounded-3xl bg-[#fffcf5] border-0 flex flex-col justify-center min-h-[100px] md:min-h-[140px] transition-all duration-500 shadow-sm relative";
                 
                 updatePitchModifier(1.3);
                 if (hasInitialized) speakText("Hello, I'm Xeno. Press the START button!");
             } else {
-                document.getElementById('char-xena').className = "px-4 py-2 text-xs font-black bg-blue-500 text-white rounded-lg shadow-sm transition-all";
+                document.getElementById('char-xena').className = "px-3 py-1.5 text-[11px] font-black bg-blue-500 text-white rounded-lg shadow-sm transition-all";
                 tutorLabel.innerText = "XENA";
-                bubbleContainer.className = "p-10 md:p-12 rounded-[2.5rem] bg-[#f4faff] border-0 flex flex-col justify-center min-h-[220px] transition-all duration-500 shadow-sm relative";
+                bubbleContainer.className = "p-5 md:p-6 rounded-3xl bg-[#f4faff] border-0 flex flex-col justify-center min-h-[100px] md:min-h-[140px] transition-all duration-500 shadow-sm relative";
                 
                 updatePitchModifier(1.7);
                 if (hasInitialized) speakText("Hello, I'm Xena. Press the START button!");
@@ -642,12 +605,13 @@
             isMimicActive = true;
             updatePitchModifier(1.5); 
             
-            mainBtn.className = "px-12 py-5 bg-rose-600 hover:bg-rose-700 active:scale-95 text-white text-xl font-black rounded-2xl shadow-md transition-all flex items-center justify-center gap-3";
+            // 버튼 디자인 컴팩트 교정
+            mainBtn.className = "px-8 py-3 bg-rose-600 hover:bg-rose-700 active:scale-95 text-white text-lg font-black rounded-xl shadow-md transition-all flex items-center justify-center gap-2";
             btnIcon.innerText = "■";
             btnText.innerText = "STOP";
 
             userText.innerText = "Listening... Speak now! 🎙️";
-            userText.className = "text-slate-800 font-extrabold text-2xl md:text-3xl leading-relaxed transition-all duration-300";
+            userText.className = "text-slate-800 font-extrabold text-base md:text-lg leading-snug transition-all duration-300";
             
             micIndicator.classList.remove('hidden');
             micGaugeContainer.classList.remove('hidden');
@@ -672,12 +636,13 @@
         function stopMimicPlayMode() {
             isMimicActive = false;
             
-            mainBtn.className = "px-12 py-5 bg-indigo-600 hover:bg-indigo-700 active:scale-95 text-white text-xl font-black rounded-2xl shadow-md shadow-indigo-100 transition-all flex items-center justify-center gap-3";
+            // 버튼 디자인 컴팩트 교정
+            mainBtn.className = "px-8 py-3 bg-indigo-600 hover:bg-indigo-700 active:scale-95 text-white text-lg font-black rounded-xl shadow-md shadow-indigo-100 transition-all flex items-center justify-center gap-2";
             btnIcon.innerText = "▶";
             btnText.innerText = "START";
 
             userText.innerText = "Tutor is ready. Press START and say something!";
-            userText.className = "text-slate-400 font-bold text-lg md:text-xl italic transition-all duration-300 leading-relaxed";
+            userText.className = "text-slate-400 font-bold text-sm md:text-base italic transition-all duration-300 leading-snug";
 
             micIndicator.classList.add('hidden');
             micGaugeContainer.classList.add('hidden');
@@ -685,7 +650,6 @@
 
             resetMimicLoop();
 
-            // [메모리/배터리 누수 방지 1] 마이크 하드웨어 전원 완전 차단 (상단 빨간 점 제거)
             if (micStream) {
                 micStream.getTracks().forEach(track => track.stop());
                 micStream = null;
@@ -801,7 +765,6 @@
                     renderer.stopSpeakingAnim();
                     if (isMimicActive) userText.innerText = "Listening... Speak now! 🎙️";
 
-                    // [메모리/배터리 누수 방지 2] 사용이 끝난 오디오 노드 명시적 연결 해제 (장시간 사용 시 튕김 방지)
                     try {
                         source.disconnect();
                         playbackAnalyser.disconnect();
@@ -851,7 +814,9 @@
             
             const overlay = document.getElementById('start-overlay');
             if (overlay) {
-                overlay.style.display = 'none';
+                overlay.style.opacity = '0';
+                overlay.style.pointerEvents = 'none'; 
+                setTimeout(() => { overlay.remove(); }, 400);
             }
 
             try {
@@ -867,7 +832,24 @@
                 console.warn("Audio unlock failed:", e);
             }
 
-            playWelcomeSpeech();
+            setTimeout(() => {
+                if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+                    navigator.mediaDevices.getUserMedia({ audio: true }).then(stream => {
+                        micStream = stream;
+                        console.log("Audio infrastructure successfully prepared.");
+                        
+                        micStream.getTracks().forEach(track => track.stop());
+                        micStream = null;
+
+                        playWelcomeSpeech();
+                    }).catch(e => {
+                        console.warn("User microphone ignored or access declined:", e);
+                        playWelcomeSpeech();
+                    });
+                } else {
+                    playWelcomeSpeech();
+                }
+            }, 500); 
         }
 
         window.onload = () => {
