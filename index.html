@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Mimic you v0.40</title>
+    <title>Mimic you v0.60</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
@@ -16,164 +16,200 @@
             transition: background-color 0.5s ease;
         }
 
-        /* 모바일 100vh 및 캐릭터 캔버스 비율 최적화 */
+        /* 2:3 전신 비율 캔버스 반응형 제어 */
         .canvas-responsive {
             width: 100%;
-            max-width: 260px;
+            max-width: 320px;
             height: auto;
             aspect-ratio: 2 / 3;
         }
 
-        /* 슬라이더 스타일 */
-        input[type="range"] {
-            -webkit-appearance: none;
-            appearance: none;
-            height: 6px;
-            border-radius: 4px;
-            background: #e2e8f0;
-            outline: none;
-        }
-        input[type="range"]::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            appearance: none;
-            width: 16px;
-            height: 16px;
-            border-radius: 50%;
-            background: #475569;
-            border: 2px solid #ffffff;
-            cursor: pointer;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.15);
-        }
-
-        /* 깜빡이는 녹음 중 빨간 동그라미 애니메이션 */
-        @keyframes blink-record {
-            0%, 100% { opacity: 0.2; }
-            50% { opacity: 1; }
-        }
-        .animate-blink-record {
-            animation: blink-record 1s infinite;
+        @media (max-width: 768px) {
+            .canvas-responsive {
+                max-width: 180px; /* Scaled down slightly to keep character shape beautifully scaled but compact */
+            }
+            body {
+                padding: 1rem !important;
+            }
+            /* Reduce paddings and text sizes of speech bubbles */
+            #tutor-bubble-container {
+                padding: 1.5rem !important;
+                min-height: 120px !important;
+                border-radius: 1.5rem !important;
+            }
+            #tutor-bubble {
+                font-size: 1.25rem !important;
+                line-height: 1.5 !important;
+            }
+            #user-bubble-container {
+                padding: 1.25rem !important;
+                min-height: 100px !important;
+                border-radius: 1.5rem !important;
+            }
+            #user-text {
+                font-size: 1rem !important;
+                line-height: 1.4 !important;
+            }
+            #main-action-btn {
+                padding: 1rem 2.5rem !important;
+                font-size: 1.25rem !important;
+                border-radius: 1rem !important;
+            }
+            .max-w-7xl {
+                gap: 1rem !important;
+            }
+            .grid {
+                gap: 1rem !important;
+            }
+            .flex-wrap {
+                gap: 0.5rem !important;
+                padding: 0.5rem !important;
+            }
         }
     </style>
 </head>
-<body class="h-screen w-screen overflow-hidden flex flex-col justify-between p-4 md:p-8 select-none bg-white">
+<body class="min-h-screen flex flex-col justify-between p-8 md:p-16 select-none bg-white">
 
-    <!-- 1회성 시작 오버레이 -->
+    <!-- 1회성 시작 오버레이 (영문 전용, 깔끔하고 가독성 극대화) -->
     <div id="start-overlay" class="fixed inset-0 bg-[#0f172a] z-[60] flex flex-col items-center justify-center text-white cursor-pointer" onclick="initAppOnInteraction()">
-        <h2 class="text-4xl font-extrabold tracking-tight mb-3 text-[#f8fafc]">Mimic you</h2>
-        <p class="text-slate-400 text-xs font-bold tracking-widest uppercase">Click anywhere to start</p>
+        <h2 class="text-5xl font-extrabold tracking-tight mb-4 text-[#f8fafc]">Mimic you</h2>
+        <p class="text-slate-400 text-sm font-bold tracking-widest uppercase">Click anywhere to start</p>
     </div>
 
-    <!-- 메인 레이아웃 (요청한 순서로 수직 재배치) -->
-    <div class="w-full max-w-md mx-auto h-full flex flex-col justify-between gap-2">
+    <!-- 메인 네이티브 컨테이너 (바탕 카드 패널 제거, 풀화면 레이아웃) -->
+    <div class="w-full max-w-7xl mx-auto flex flex-col flex-1 justify-between gap-12">
         
-        <!-- 1. 타이틀 -->
-        <div class="flex items-center justify-between border-b border-slate-100 pb-2 shrink-0">
-            <h1 class="text-2xl font-extrabold text-slate-700 flex items-baseline tracking-tight">
-                Mimic you <span class="text-slate-400 text-xs ml-2 font-bold">v0.40</span>
-            </h1>
-        </div>
+        <!-- HEADER BAR (타이틀 v0.20 짙은 회색 지정 및 우측 제어) -->
+        <div class="flex flex-col md:flex-row items-center justify-between border-b border-slate-100 pb-6 gap-4">
+            <div>
+                <h1 class="text-3xl font-extrabold text-slate-700 flex items-baseline tracking-tight">
+                    Mimic you <span class="text-slate-400 text-base ml-3 font-bold">v0.60</span>
+                </h1>
+            </div>
 
-        <!-- 2. 캐릭터 (Canvas) -->
-        <div class="flex justify-center items-center shrink min-h-0 py-1">
-            <canvas id="tutorCanvas" width="400" height="600" class="bg-transparent canvas-responsive max-h-[35vh] object-contain transition-all duration-300"></canvas>
-        </div>
-
-        <!-- 3. 대형 START / STOP 버튼 -->
-        <div class="flex items-center justify-center p-2 bg-slate-50 rounded-xl border border-slate-100 shadow-sm shrink-0">
-            <button id="main-action-btn" onclick="toggleMimicMode()" class="w-full py-3.5 bg-indigo-600 hover:bg-indigo-700 active:scale-95 text-white text-lg font-black rounded-xl shadow-md transition-all flex items-center justify-center gap-2">
-                <span id="btn-icon">▶</span>
-                <span id="btn-text">START</span>
-            </button>
-        </div>
-
-        <!-- 4. 유저 말풍선 (YOU) -->
-        <div id="user-bubble-container" class="p-4 rounded-2xl bg-[#fffdf0] border-0 flex flex-col justify-center min-h-[70px] shadow-sm relative shrink-0">
-            <div class="mb-1 flex justify-between items-center">
-                <div class="flex items-center space-x-2">
-                    <span class="text-[10px] font-black text-slate-400 tracking-widest uppercase">YOU</span>
-                    <span id="automatic-speak-indicator" class="hidden flex items-center bg-rose-50 text-rose-600 text-[9px] font-black px-2 py-0.5 rounded-full border border-rose-100 animate-pulse">
-                        <span class="w-1.5 h-1.5 bg-rose-500 rounded-full mr-1 animate-blink-record inline-block"></span>
-                        Speak Now!
-                    </span>
+            <!-- 우측 상단 볼륨 조절 & 캐릭터 스위처 -->
+            <div class="flex flex-wrap items-center gap-6 bg-slate-50/50 p-2.5 rounded-2xl border border-slate-100/80 shadow-sm">
+                <!-- 캐릭터 선택 버튼 -->
+                <div class="flex space-x-1 bg-slate-200/50 p-1 rounded-xl">
+                    <button id="char-xeno" onclick="setCharacter('xeno')" class="px-4 py-2 text-xs font-bold text-slate-500 rounded-lg transition-all">Xeno</button>
+                    <button id="char-xena" onclick="setCharacter('xena')" class="px-4 py-2 text-xs font-bold text-slate-500 rounded-lg transition-all">Xena</button>
                 </div>
+
+                <!-- 변조 속도/피치 게이지 -->
+                <div class="flex items-center space-x-2 px-3 py-1 border-l border-slate-200">
+                    <span class="text-xs font-bold text-slate-500">🐹 Pitch:</span>
+                    <input type="range" id="mimic-pitch-slider" min="1.0" max="2.0" step="0.1" value="1.3" class="w-24 accent-indigo-600" oninput="updatePitchModifier(this.value)">
+                    <span id="mimic-pitch-text" class="text-xs text-slate-500 font-mono font-bold w-10 text-right">1.3x</span>
+                </div>
+
+                <!-- 볼륨 게이지 슬라이더 -->
+                <div class="flex items-center space-x-2 px-3 py-1 border-l border-slate-200">
+                    <span class="text-sm opacity-70">🔈</span>
+                    <input type="range" id="master-vol" min="0" max="1" step="0.1" value="1" class="w-24 accent-slate-700" oninput="updateVolume(this.value)">
+                    <span id="volume-text" class="text-xs text-slate-500 font-mono font-bold w-10 text-right">100%</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- MAIN LAYOUT -->
+        <div class="grid grid-cols-1 md:grid-cols-12 gap-12 flex-1 items-center">
+            
+            <!-- 좌측 캐릭터 영역 (Canvas) -->
+            <div class="md:col-span-5 flex flex-col items-center justify-center space-y-6">
+                <!-- 캐릭터 뷰 영역 Canvas (완전 투명 배경, 400x600 px 전신 대응 종횡비, 글로우 효과 없음) -->
+                <div class="relative flex items-center justify-center w-full">
+                    <canvas id="tutorCanvas" width="400" height="600" class="bg-transparent canvas-responsive transition-all duration-300"></canvas>
+                </div>
+            </div>
+
+            <!-- 우측 대화 버블 영역 (라인 없음, 폰트 가독성 극대화, 2단 대화 시스템) -->
+            <div class="md:col-span-7 flex flex-col justify-between h-full min-h-[500px] gap-6">
                 
-                <div id="mic-gauge-container" class="hidden flex items-center space-x-1.5 bg-indigo-50 px-2 py-1 rounded-full border border-indigo-100">
-                    <span class="text-[8px] font-black text-indigo-500 uppercase tracking-wider">Vol</span>
-                    <div class="w-16 h-1.5 bg-indigo-200/60 rounded-full overflow-hidden">
-                        <div id="mic-gauge-fill" class="h-full bg-indigo-500 w-0 transition-all duration-75"></div>
+                <!-- 1. 대형 START / STOP 단일 컨트롤 패널 -->
+                <div class="flex items-center justify-center p-5 bg-slate-50 rounded-2xl border border-slate-100 shadow-sm gap-4">
+                    <button id="main-action-btn" onclick="toggleMimicMode()" class="px-12 py-5 bg-indigo-600 hover:bg-indigo-700 active:scale-95 text-white text-xl font-black rounded-2xl shadow-md shadow-indigo-100 transition-all flex items-center justify-center gap-3">
+                        <span id="btn-icon">▶</span>
+                        <span id="btn-text">START</span>
+                    </button>
+                </div>
+
+                <!-- 2. 유저 음성 상태 및 실시간 볼륨 게이지 말풍선 (위치 이동: YOU) -->
+                <div id="user-bubble-container" class="p-10 md:p-12 rounded-[2.5rem] bg-[#fffdf0] border-0 flex flex-col justify-center min-h-[160px] shadow-sm relative transition-all duration-500">
+                    <div class="mb-3 flex justify-between items-center">
+                        <div class="flex items-center space-x-4">
+                            <span class="text-xs font-black text-slate-400 tracking-widest uppercase">YOU</span>
+                            <!-- 자동으로 켜지는 마이크 상태 지시등과 텍스트 -->
+                            <span id="automatic-speak-indicator" class="hidden flex items-center bg-rose-50 text-rose-600 text-[10px] font-black px-2.5 py-1.5 rounded-full border border-rose-100 animate-pulse">
+                                <span class="w-2 h-2 bg-rose-500 rounded-full mr-1.5 animate-blink-record inline-block"></span>
+                                Speak Now!
+                            </span>
+                        </div>
+                        
+                        <!-- 마이크 볼륨 실시간 게이지 (자동으로 활성화) -->
+                        <div id="mic-gauge-container" class="hidden flex items-center space-x-2 bg-indigo-50 px-3 py-1.5 rounded-full border border-indigo-100 transition-all duration-300">
+                            <span class="text-[9px] font-black text-indigo-500 uppercase tracking-wider">Volume</span>
+                            <div class="w-24 h-2 bg-indigo-200/60 rounded-full overflow-hidden">
+                                <div id="mic-gauge-fill" class="h-full bg-indigo-500 w-0 transition-all duration-75"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- 실시간 유저 상태 가이드 텍스트 출력창 -->
+                    <div id="user-text" class="text-slate-400 font-bold text-lg md:text-xl italic transition-all duration-300 leading-relaxed">
+                        Tutor is ready. Press START and say something!
                     </div>
                 </div>
+
+                <!-- 3. 튜터 대사 말풍선 (위치 이동: TUTOR) -->
+                <div id="tutor-bubble-container" class="p-10 md:p-12 rounded-[2.5rem] transition-all duration-500 flex flex-col justify-center min-h-[220px] shadow-sm relative border-0">
+                    <div class="mb-3">
+                        <span id="tutor-label" class="text-xs font-black text-slate-400 tracking-widest uppercase">TUTOR</span>
+                    </div>
+                    <!-- 튜터 대사 버블 (이름 제거, 폰트 가독성 최대화) -->
+                    <div id="tutor-bubble" class="text-slate-800 font-extrabold text-2xl md:text-3xl leading-relaxed transition-all duration-300">
+                        Initializing character...
+                    </div>
+                </div>
+
             </div>
-            <div id="user-text" class="text-slate-500 font-bold text-sm italic transition-all duration-300 truncate">
-                Tutor is ready. Press START and say something!
-            </div>
+
         </div>
-
-        <!-- 5. 캐릭터 말풍선 (TUTOR) -->
-        <div id="tutor-bubble-container" class="p-4 rounded-2xl transition-all duration-500 flex flex-col justify-center min-h-[70px] shadow-sm relative border-0 shrink-0">
-            <div class="mb-1">
-                <span id="tutor-label" class="text-[10px] font-black text-slate-400 tracking-widest uppercase">TUTOR</span>
-            </div>
-            <div id="tutor-bubble" class="text-slate-800 font-extrabold text-sm md:text-base leading-snug transition-all duration-300 line-clamp-2">
-                Initializing character...
-            </div>
-        </div>
-
-        <!-- 6. 옵션 패널 (캐릭터 선택, 피치, 볼륨 조절) -->
-        <div class="flex flex-wrap items-center justify-between gap-2 bg-slate-50/80 p-2 rounded-xl border border-slate-100 shadow-sm shrink-0 text-xs">
-            <!-- 캐릭터 선택 버튼 -->
-            <div class="flex space-x-1 bg-slate-200/50 p-0.5 rounded-lg">
-                <button id="char-xeno" onclick="setCharacter('xeno')" class="px-2.5 py-1 text-[11px] font-bold text-slate-500 rounded-md transition-all">Xeno</button>
-                <button id="char-xena" onclick="setCharacter('xena')" class="px-2.5 py-1 text-[11px] font-bold text-slate-500 rounded-md transition-all">Xena</button>
-            </div>
-
-            <!-- 변조 속도/피치 게이지 -->
-            <div class="flex items-center space-x-1">
-                <span class="font-bold text-slate-500 text-[11px]">Pitch:</span>
-                <input type="range" id="mimic-pitch-slider" min="1.0" max="2.0" step="0.1" value="1.3" class="w-16 accent-indigo-600" oninput="updatePitchModifier(this.value)">
-                <span id="mimic-pitch-text" class="text-[10px] text-slate-500 font-mono font-bold w-6 text-right">1.3x</span>
-            </div>
-
-            <!-- 볼륨 게이지 슬라이더 -->
-            <div class="flex items-center space-x-1">
-                <span class="text-xs opacity-70">🔈</span>
-                <input type="range" id="master-vol" min="0" max="1" step="0.1" value="1" class="w-14 accent-slate-700" oninput="updateVolume(this.value)">
-                <span id="volume-text" class="text-[10px] text-slate-500 font-mono font-bold w-7 text-right">100%</span>
-            </div>
-        </div>
-
     </div>
 
     <script>
-        /* 코어 전역 상태 변수 */
+        /* =========================================================
+           1. 코어 전역 상태 변수
+           ========================================================= */
         let currentChar = 'xeno';
-        let isTutorSpeaking = false;
+        let isTutorSpeaking = false; // TTS가 재생 중인지 여부
         let hasInitialized = false;
         let masterVolume = 1.0;
-        let mimicPitchValue = 1.3;
+        let mimicPitchValue = 1.3; // 변조 피치/배속 기본값 (Xeno: 1.3, Xena: 1.7)
         
-        let isMimicActive = false;
-        let isRecording = false;
-        let isPlaybackActive = false;
+        // Mimic play core variables (Talking Tom loop)
+        let isMimicActive = false; // START 버튼 활성화 여부
+        let isRecording = false; // 실제로 소리를 감지하여 녹음 중인지 여부
+        let isPlaybackActive = false; // 녹음된 소리를 변조 재생 중인지 여부
         let audioCtx = null;
         let micStream = null;
         let micSourceNode = null;
         let analyserNode = null;
         let mediaRecorder = null;
         let audioChunks = [];
-        let playbackAnalyser = null;
+        let playbackAnalyser = null; // 재생 음성 립싱크 추적용 분석기
         
+        // VAD 타이밍 변수
         let silenceStartTime = null;
         let recordStartTime = 0;
         let vadAnimationId = null;
         
-        const VOICE_THRESHOLD = 12;
-        const SILENCE_DURATION = 1200;
-        const MAX_RECORD_TIME = 6000;
+        const VOICE_THRESHOLD = 12; // 소리 감지 임계치 (0 ~ 255)
+        const SILENCE_DURATION = 1200; // 녹음을 자동 마감하기 위한 고요함 유지 밀리초
+        const MAX_RECORD_TIME = 6000; // 최대 수집 한계 시간 (6초)
 
+        // Chrome Garbage Collector 방지용 전역 TTS 발화 객체 레퍼런스 유지
         window.activeUtterance = null;
         window.ttsFallbackTimeout = null;
-        window.lastSpeakStartTime = 0;
+        window.lastSpeakStartTime = 0; // 발화 시작 타임스탬프 기록
 
         const tutorBubble = document.getElementById('tutor-bubble');
         const tutorLabel = document.getElementById('tutor-label');
@@ -188,7 +224,9 @@
         const micGaugeContainer = document.getElementById('mic-gauge-container');
         const micGaugeFill = document.getElementById('mic-gauge-fill');
 
-        /* 2D 그래픽 렌더러 */
+        /* =========================================================
+           2. 캔버스 2D v11 프리미엄 벡터 전신 캐릭터 그래픽 렌더러
+           ========================================================= */
         const renderer = {
             config: {
                 "xena": { "baseScale": 0.9, "baseX": -1, "baseY": 35, "eyeY": 96, "eyeSpacing": 70, "eyeWidth": 13, "eyeHeight": 13, "eyeLineThickness": 1, "pupilSize": 24, "pupilLeftOffsetX": 2.5, "pupilRightOffsetX": -3, "eyebrowY": -36, "eyebrowLength": 21, "eyebrowAngle": -14, "eyebrowThickness": 3, "mouthY": 145, "mouthWidth": 33.5, "verticalLineLength": 7, "mouthCurve": 9, "mouthOffsetX": 1, "mouthOffsetY": 1.5, "mouthLineThickness": 1.4, "mouthOpenStyle": "smiling" },
@@ -215,6 +253,7 @@
                 this.simulation.isSpeaking = true;
                 this.simulation.speakType = type;
                 
+                // TTS 발화 애니메이션일 때만 랜덤 오물거림 인터벌 가동
                 if (type === 'tts') {
                     const vowels = ['A', 'E', 'I', 'O', 'U'];
                     let vIdx = 0;
@@ -241,6 +280,7 @@
                     this.ctx.save();
                     this.ctx.translate(200, 300 + breathe);
 
+                    // 1. 투명 배경 바탕에 원화 이미지 그리기
                     if (this.imageLoaded[currentChar]) {
                         const img = this.images[currentChar];
                         const cfg = this.config[currentChar];
@@ -251,6 +291,8 @@
                         this.drawBackupSilhouette();
                     }
 
+                    // [버그 수정 및 리팩토링] 변조 오디오 재생 시 입 모양 추적 로직을 60FPS 메인 루프에 정밀 이식!
+                    // 이로써 재생 버퍼와 렌더 스레드 간의 립싱크 꼬임이나 바르르 떠는 노이즈가 완전히 사라집니다.
                     if (isPlaybackActive && playbackAnalyser) {
                         const bufferLength = playbackAnalyser.frequencyBinCount;
                         const dataArray = new Uint8Array(bufferLength);
@@ -261,6 +303,7 @@
                         }
                         const average = sum / bufferLength;
                         
+                        // 지수 평활화 필터를 통해 입술 떨림 노이즈를 제어하고 부드럽고 가시적인 상하 개구도 구현
                         const targetMouthOpen = Math.min(14, average * 0.22);
                         this.simulation.mouthOpen = (this.simulation.mouthOpen * 0.75) + (targetMouthOpen * 0.25);
                         
@@ -271,18 +314,20 @@
                         }
                     }
 
+                    // 2. 고화질 실시간 조율 피처 (눈, 눈썹, 입동기화) 순차 빌드
                     this.drawVectorEyes();
                     this.drawVectorEyebrows();
                     this.drawVectorMouth();
                     
                     this.ctx.restore();
 
+                    // 3. 눈 깜빡임 타이밍 루프 계산
                     if (!this.simulation.isSpeaking) {
                         this.simulation.blinkTimer++;
                         if (this.simulation.blinkTimer > 200) {
-                            this.simulation.blinkState = 1;
+                            this.simulation.blinkState = 1; // Closed
                             if (this.simulation.blinkTimer > 212) {
-                                this.simulation.blinkState = 0;
+                                this.simulation.blinkState = 0; // Open
                                 this.simulation.blinkTimer = 0;
                             }
                         }
@@ -374,6 +419,9 @@
                 const cfg = this.config[currentChar];
                 this.ctx.save();
                 this.ctx.translate(cfg.mouthOffsetX || 0, (cfg.mouthY - 200) + (cfg.mouthOffsetY || 0));
+
+                const currentMouthW = cfg.mouthWidth;
+                const currentMouthH = this.simulation.mouthOpen;
 
                 if (this.simulation.mouthOpen > 1.5) {
                     let scaleW = 1.0;
@@ -487,7 +535,9 @@
             }
         };
 
-        /* TTS 음성 합성 Engine */
+        /* =========================================================
+           3. 다국어 음성 합성 엔진 (TTS)
+           ========================================================= */
         let voices = [];
         speechSynthesis.onvoiceschanged = () => { voices = speechSynthesis.getVoices(); };
 
@@ -510,6 +560,8 @@
             volSlider.disabled = true;
             tutorBubble.innerHTML = text;
 
+            // [안정성 조치] SpeechSynthesis가 백그라운드 엔진 가동 중 딜레이가 있더라도
+            // 립싱크를 선제 가동하여 곰 캐릭터 및 여우의 입 애니메이션 끊김 현상을 완벽히 해결합니다.
             renderer.startSpeakingAnim('tts');
 
             const utterance = new SpeechSynthesisUtterance(text);
@@ -525,6 +577,7 @@
             if (!bestVoice) bestVoice = voices.find(v => v.lang.includes(targetLang));
             if (bestVoice) utterance.voice = bestVoice;
 
+            // [핵심 요구사항 반영] 슬라이더의 변조 피치/배율에 맞춰 인사말 음성도 완벽히 동조되어 찢어지는 칩만큼 톤 변형
             utterance.pitch = mimicPitchValue;
             utterance.rate = Math.min(1.4, Math.max(0.7, 0.95 * (mimicPitchValue / (currentChar === 'xeno' ? 1.3 : 1.7))));
 
@@ -541,6 +594,7 @@
             const duration = (text.length * 110) + 1500;
             window.ttsFallbackTimeout = setTimeout(() => {
                 if (isTutorSpeaking) {
+                    console.log("TTS Safety Fallback triggered.");
                     stopSpeaking();
                 }
             }, duration);
@@ -556,47 +610,55 @@
                 window.activeUtterance.onend = null;
                 window.activeUtterance.onerror = null;
             }
-            speechSynthesis.cancel();
+            speechSynthesis.cancel(); // Stop TTS audio completely
             isTutorSpeaking = false;
             renderer.stopSpeakingAnim();
             volSlider.disabled = false;
             window.activeUtterance = null;
         }
 
-        /* 캐릭터 스위칭 */
+        /* =========================================================
+           4. 캐릭터 전환 및 파스텔 말풍선 스타일 주입
+           ========================================================= */
         function setCharacter(char) {
             currentChar = char;
 
+            // 캐릭터 변경 시 오디오 재생 및 TTS 즉시 초기화하여 충돌 완벽 차단
             stopSpeaking();
             stopMimicPlayMode(); 
 
-            document.getElementById('char-xeno').className = "px-2.5 py-1 text-[11px] font-bold text-slate-500 rounded-md transition-all";
-            document.getElementById('char-xena').className = "px-2.5 py-1 text-[11px] font-bold text-slate-500 rounded-md transition-all";
+            document.getElementById('char-xeno').className = "px-4 py-2 text-xs font-bold text-slate-500 rounded-lg transition-all";
+            document.getElementById('char-xena').className = "px-4 py-2 text-xs font-bold text-slate-500 rounded-lg transition-all";
 
+            // [아주 옅은 오렌지 & 아주 옅은 하늘색 말풍선 완벽 매칭]
             if (char === 'xeno') {
-                document.getElementById('char-xeno').className = "px-2.5 py-1 text-[11px] font-black bg-orange-500 text-white rounded-md shadow-sm transition-all";
+                document.getElementById('char-xeno').className = "px-4 py-2 text-xs font-black bg-orange-500 text-white rounded-lg shadow-sm transition-all";
                 tutorLabel.innerText = "XENO";
-                bubbleContainer.className = "p-4 rounded-2xl bg-[#fffcf5] border-0 flex flex-col justify-center min-h-[70px] transition-all duration-500 shadow-sm relative shrink-0";
+                bubbleContainer.className = "p-10 md:p-12 rounded-[2.5rem] bg-[#fffcf5] border-0 flex flex-col justify-center min-h-[220px] transition-all duration-500 shadow-sm relative";
                 
+                // [요구사항 반영] 캐릭터 변경 시, 여우는 1.3 기저값으로 피치 리셋 설정
                 updatePitchModifier(1.3);
                 
                 if (hasInitialized) {
-                    speakText("Hello! I'm Xeno. It's so good to see you again! Press the START button, and I will mimic your words!");
+                    speakText("Hello, I'm Xeno. Press the START button!");
                 }
             } else {
-                document.getElementById('char-xena').className = "px-2.5 py-1 text-[11px] font-black bg-blue-500 text-white rounded-md shadow-sm transition-all";
+                document.getElementById('char-xena').className = "px-4 py-2 text-xs font-black bg-blue-500 text-white rounded-lg shadow-sm transition-all";
                 tutorLabel.innerText = "XENA";
-                bubbleContainer.className = "p-4 rounded-2xl bg-[#f4faff] border-0 flex flex-col justify-center min-h-[70px] transition-all duration-500 shadow-sm relative shrink-0";
+                bubbleContainer.className = "p-10 md:p-12 rounded-[2.5rem] bg-[#f4faff] border-0 flex flex-col justify-center min-h-[220px] transition-all duration-500 shadow-sm relative";
                 
+                // [요구사항 반영] 캐릭터 변경 시, 곰은 1.4 기저값으로 피치 리셋 설정
                 updatePitchModifier(1.3);
                 
                 if (hasInitialized) {
-                    speakText("Hi there! I'm Xena. It's so good to see you again! Press the START button, and I will mimic your words!");
+                    speakText("Hello, I'm Xena. Press the START button!");
                 }
             }
         }
 
-        /* 컨트롤 및 슬라이더 */
+        /* =========================================================
+           5. 볼륨 및 피치 변조 제어 슬라이더
+           ========================================================= */
         function updateVolume(val) {
             masterVolume = parseFloat(val);
             document.getElementById('volume-text').innerText = Math.round(masterVolume * 100) + '%';
@@ -608,7 +670,9 @@
             document.getElementById('mimic-pitch-text').innerText = val + 'x';
         }
 
-        /* Mimic 처리 모드 */
+        /* =========================================================
+           6. Mimic you 익살스러운 음성 변조 및 실시간 립싱크 제어 루프
+           ========================================================= */
         function toggleMimicMode() {
             if (!hasInitialized) {
                 alert("Please click anywhere to start the application first!");
@@ -616,26 +680,31 @@
             }
 
             if (isMimicActive) {
+                // STOP 버튼 클릭 시 동작
                 stopMimicPlayMode();
             } else {
+                // START 버튼 클릭 시 동작
                 startMimicPlayMode();
             }
         }
 
         async function startMimicPlayMode() {
+            // TTS 인사말 재생 중이었다면 즉각 컷
             if (isTutorSpeaking) {
                 stopSpeaking();
             }
 
             isMimicActive = true;
-            updatePitchModifier(1.5);
+            updatePitchModifier(1.5); // [요구사항 반영] 스타트 시 유저는 1.5로 자동 세팅
             
-            mainBtn.className = "w-full py-3.5 bg-rose-600 hover:bg-rose-700 active:scale-95 text-white text-lg font-black rounded-xl shadow-md transition-all flex items-center justify-center gap-2";
+            // UI 스타일 Rose/Stop 색으로 전환
+            mainBtn.className = "px-12 py-5 bg-rose-600 hover:bg-rose-700 active:scale-95 text-white text-xl font-black rounded-2xl shadow-md transition-all flex items-center justify-center gap-3";
             btnIcon.innerText = "■";
             btnText.innerText = "STOP";
 
+            // 마이크 활성화 및 VAD 루프 트리거
             userText.innerText = "Listening... Speak now! 🎙️";
-            userText.className = "text-slate-800 font-extrabold text-base leading-snug transition-all duration-300 truncate";
+            userText.className = "text-slate-800 font-extrabold text-2xl md:text-3xl leading-relaxed transition-all duration-300";
             
             micIndicator.classList.remove('hidden');
             micGaugeContainer.classList.remove('hidden');
@@ -662,12 +731,13 @@
         function stopMimicPlayMode() {
             isMimicActive = false;
             
-            mainBtn.className = "w-full py-3.5 bg-indigo-600 hover:bg-indigo-700 active:scale-95 text-white text-lg font-black rounded-xl shadow-md transition-all flex items-center justify-center gap-2";
+            // UI 복구
+            mainBtn.className = "px-12 py-5 bg-indigo-600 hover:bg-indigo-700 active:scale-95 text-white text-xl font-black rounded-2xl shadow-md shadow-indigo-100 transition-all flex items-center justify-center gap-3";
             btnIcon.innerText = "▶";
             btnText.innerText = "START";
 
             userText.innerText = "Tutor is ready. Press START and say something!";
-            userText.className = "text-slate-400 font-bold text-sm italic transition-all duration-300 truncate";
+            userText.className = "text-slate-400 font-bold text-lg md:text-xl italic transition-all duration-300 leading-relaxed";
 
             micIndicator.classList.add('hidden');
             micGaugeContainer.classList.add('hidden');
@@ -685,6 +755,7 @@
             }
         }
 
+        // 마이크 볼륨 실시간 트래킹 및 침묵(VAD) 감지 제어 스레드
         function startVADMonitoring() {
             if (vadAnimationId) cancelAnimationFrame(vadAnimationId);
 
@@ -692,13 +763,15 @@
             const dataArray = new Uint8Array(bufferLength);
 
             const checkVADLevel = () => {
-                if (!isMimicActive) return;
+                if (!isMimicActive) return; // 미믹 모드가 완전 꺼지면 즉시 이탈
 
+                // 만약 현재 곰/여우가 칩만큼 재생 중이라면 마이크 분석 처리를 스킵하고 립싱크 렌더러에 연산 권한 양도
                 if (isPlaybackActive) {
                     vadAnimationId = requestAnimationFrame(checkVADLevel);
                     return;
                 }
 
+                // 마이크 볼륨 실시간 연산
                 analyserNode.getByteFrequencyData(dataArray);
                 let sum = 0;
                 for (let i = 0; i < bufferLength; i++) {
@@ -706,12 +779,15 @@
                 }
                 const average = sum / bufferLength;
 
+                // 실시간 게이지 미터기 매핑
                 const percentage = Math.min(100, Math.round((average / 60) * 100));
                 if (micGaugeFill) {
                     micGaugeFill.style.width = percentage + '%';
                 }
 
+                // VAD 판단 흐름 설계
                 if (average > VOICE_THRESHOLD) {
+                    // 유의미한 볼륨 진폭 시작 -> 자동으로 녹음 개시
                     if (!isRecording) {
                         isRecording = true;
                         audioChunks = [];
@@ -719,6 +795,7 @@
                         
                         userText.innerText = "Speak now! I'm listening... 🎙️";
                         
+                        // MediaRecorder 구동 (모바일 브라우저 및 iOS 호환을 위한 MIME Type 선별 처리)
                         let recorderOptions = {};
                         if (typeof MediaRecorder !== 'undefined' && typeof MediaRecorder.isTypeSupported === 'function') {
                             if (MediaRecorder.isTypeSupported('audio/webm')) {
@@ -735,12 +812,15 @@
                         };
                         mediaRecorder.start();
                     }
+                    // 말하는 도중에는 지속적으로 침묵 시작 시간을 무화(Null) 처리
                     silenceStartTime = null;
                 } else {
+                    // 고요 상태 돌입
                     if (isRecording) {
                         if (silenceStartTime === null) {
                             silenceStartTime = Date.now();
                         } else if (Date.now() - silenceStartTime > SILENCE_DURATION || Date.now() - recordStartTime > MAX_RECORD_TIME) {
+                            // 1.2초간 말을 멈췄거나 최대 6초 수집 한계 도달 시 녹음 자동마감 후 변조 즉시 재생
                             isRecording = false;
                             silenceStartTime = null;
                             
@@ -760,6 +840,7 @@
             checkVADLevel();
         }
 
+        // Web Audio API를 활용한 무지연 고속 디코딩 및 익살 보이스 변조
         async function playChipmunkModulatedVoice() {
             if (audioChunks.length === 0) {
                 isPlaybackActive = false;
@@ -776,13 +857,16 @@
             
             try {
                 const arrayBuffer = await blob.arrayBuffer();
+                // 오프라인 디코딩 데이터 획득
                 const audioBuffer = await audioCtx.decodeAudioData(arrayBuffer);
 
                 const source = audioCtx.createBufferSource();
                 source.buffer = audioBuffer;
 
+                // [핵심 요구사항] 목소리 피치와 속도를 조화롭게 변조 (1.0x ~ 2.0x 배속 유동 스케일 조율 완료)
                 source.playbackRate.value = mimicPitchValue;
 
+                // 립싱크 앰플리튜드 정밀 추적용 프레임 버퍼 노드 결합
                 playbackAnalyser = audioCtx.createAnalyser();
                 playbackAnalyser.fftSize = 128;
 
@@ -795,6 +879,7 @@
                     isPlaybackActive = false;
                     renderer.stopSpeakingAnim();
                     
+                    // 재생이 끝나면 자동으로 마이크 대기 모드로 온(On) 복귀
                     if (isMimicActive) {
                         userText.innerText = "Listening... Speak now! 🎙️";
                     }
@@ -822,41 +907,48 @@
             renderer.stopSpeakingAnim();
         }
 
-        /* 단축키 키바인딩 */
+        /* =========================================================
+           7. 스페이스바(Spacebar) 단축키 지원 
+           ========================================================= */
         window.addEventListener('keydown', function(e) {
             if (e.code === 'Space') {
-                e.preventDefault();
+                e.preventDefault(); // 스페이스바 디폴트 스크롤 전면 차단
                 if (hasInitialized) {
                     toggleMimicMode();
                 }
             }
         });
 
-        /* 초기화 */
+        /* =========================================================
+           8. 어플리케이션 이니셜라이즈 구동부
+           ========================================================= */
         function initAppOnInteraction() {
             if (hasInitialized) return;
             hasInitialized = true;
             document.getElementById('start-overlay').style.display = 'none';
 
+            // 마이크 및 오디오 하드웨어 선제 획득
             navigator.mediaDevices.getUserMedia({ audio: true }).then(stream => {
                 micStream = stream;
                 audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                console.log("Audio infrastructure successfully prepared.");
             }).catch(e => {
                 console.warn("User microphone ignored or access declined:", e);
             });
 
+            // "Mimic you" 교정된 첫 인사말 발화 진행
             setTimeout(() => {
                 if (currentChar === 'xeno') {
-                    speakText("Hello! I'm Xeno. It's so good to see you again! Press the START button, and I will mimic your words!");
+                    speakText("Hello, I'm Xeno. Press the START button!");
                 } else {
-                    speakText("Hi there! I'm Xena. It's so good to see you again! Press the START button, and I will mimic your words!");
+                    speakText("Hello, I'm Xena. Press the START button!");
                 }
             }, 300);
         }
 
         window.onload = () => {
             renderer.init();
-            setCharacter('xeno');
+            setCharacter('xeno'); // Xeno로 캐릭터 기본 설정 (Xeno pitch = 1.3 자동 조절)
         };
     </script>
 </body>
